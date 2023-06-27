@@ -103,7 +103,7 @@ $autoload['helper'] = array('user');
 | config files.  Otherwise, leave it blank.
 |
 */
-$autoload['config'] = array('app');
+$autoload['config'] = array('app', 'classes');
 
 /*
 | -------------------------------------------------------------------
