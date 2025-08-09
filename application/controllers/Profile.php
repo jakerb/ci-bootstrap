@@ -20,6 +20,8 @@ class Profile extends CI_Controller
         $this->load->library(['ion_auth', 'form_validation']);
         $this->load->helper(['url', 'form']);
         $this->load->library('session');
+        // load the Stripe configuration so we can verify subscriptions
+        $this->load->config('stripe');
     }
 
     /**
@@ -44,10 +46,61 @@ class Profile extends CI_Controller
         $subscription = $this->db->where('user_id', $user->id)
                                  ->where('status', 'active')
                                  ->get('subscriptions')->row();
+        // If a subscription exists, verify with Stripe that it is still active
+        if ($subscription) {
+            $secret_key = $this->config->item('stripe_secret_key');
+            $session_id = $subscription->stripe_session_id;
+            // call Stripe checkout session to verify status
+            $ch = curl_init('https://api.stripe.com/v1/checkout/sessions/' . $session_id);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_USERPWD, $secret_key . ':');
+            $resp_json = curl_exec($ch);
+            $curl_err = curl_error($ch);
+            curl_close($ch);
+            $resp = $resp_json ? json_decode($resp_json, true) : null;
+            $is_active = false;
+            if (!$resp || $curl_err) {
+                // If we can't verify via Stripe, assume inactive
+                $is_active = false;
+            } else {
+                // Stripe Checkout session status can be 'complete' when paid
+                $status  = isset($resp['status']) ? $resp['status'] : null;
+                $paystat = isset($resp['payment_status']) ? $resp['payment_status'] : null;
+                $is_active = ($status === 'complete' && $paystat === 'paid');
+            }
+            if (!$is_active) {
+                // mark subscription as cancelled locally and clear variable
+                $this->db->where('id', $subscription->id)
+                         ->update('subscriptions', [
+                             'status'     => 'cancelled',
+                             'updated_at' => date('Y-m-d H:i:s'),
+                         ]);
+                $subscription = null;
+            }
+        }
+        // define available subscription tiers
+        $tiers = [
+            'basic' => [
+                'label'       => 'Basic',
+                'description' => 'Basic plan',
+                'url'         => site_url('subscription/create?plan=basic'),
+            ],
+            'standard' => [
+                'label'       => 'Standard',
+                'description' => 'Standard plan',
+                'url'         => site_url('subscription/create?plan=standard'),
+            ],
+            'pro' => [
+                'label'       => 'Pro',
+                'description' => 'Pro plan',
+                'url'         => site_url('subscription/create?plan=pro'),
+            ],
+        ];
         $data = [
             'user'         => $user,
             'subscription' => $subscription,
             'message'      => $this->session->flashdata('message'),
+            'tiers'        => $tiers,
         ];
         $this->load->view('profile/index', $data);
     }

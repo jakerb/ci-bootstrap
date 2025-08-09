@@ -38,10 +38,22 @@
     <hr class="my-6">
     <h3 class="text-xl font-semibold mb-2">Subscription</h3>
     <?php if ($subscription): ?>
-        <p class="mb-4 text-green-600">You have an active subscription.</p>
+        <?php
+            // display the current plan if available
+            $current_plan = isset($subscription->tier) ? ucfirst($subscription->tier) : 'Unknown';
+        ?>
+        <p class="mb-4 text-green-600">You have an active subscription<?php echo $current_plan ? ' (' . $current_plan . ' plan)' : ''; ?>.</p>
     <?php else: ?>
-        <p class="mb-4">You are not subscribed yet. Subscribe now to access premium features.</p>
-        <a href="<?php echo site_url('subscription/create'); ?>" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">Subscribe Now</a>
+        <p class="mb-4">You are not subscribed yet. Choose a plan to access premium features:</p>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <?php foreach ($tiers as $key => $tier): ?>
+            <div class="border border-gray-200 rounded p-4">
+                <h4 class="text-lg font-semibold mb-2"><?php echo $tier['label']; ?></h4>
+                <p class="mb-4 text-gray-600"><?php echo $tier['description']; ?></p>
+                <a href="<?php echo $tier['url']; ?>" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">Subscribe</a>
+            </div>
+            <?php endforeach; ?>
+        </div>
     <?php endif; ?>
     <hr class="my-6">
     <div>

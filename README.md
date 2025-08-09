@@ -162,6 +162,7 @@ CREATE TABLE IF NOT EXISTS `subscriptions` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
   `user_id` INT(11) NOT NULL,
   `stripe_session_id` VARCHAR(255) NOT NULL,
+  `tier` VARCHAR(50) NULL,
   `status` VARCHAR(50) NOT NULL DEFAULT 'pending',
   `created_at` DATETIME DEFAULT NULL,
   `updated_at` DATETIME DEFAULT NULL,

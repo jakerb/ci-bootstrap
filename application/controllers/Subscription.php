@@ -40,6 +40,11 @@ class Subscription extends CI_Controller
                     'type' => 'VARCHAR',
                     'constraint' => 255,
                 ],
+                'tier' => [
+                    'type' => 'VARCHAR',
+                    'constraint' => 50,
+                    'null' => TRUE,
+                ],
                 'status' => [
                     'type' => 'VARCHAR',
                     'constraint' => 50,
@@ -85,7 +90,24 @@ class Subscription extends CI_Controller
     {
         $this->require_login();
         $secret_key = $this->config->item('stripe_secret_key');
-        $price_id   = $this->config->item('stripe_price_id');
+        // Determine which plan the user requested.  Default to the configured
+        // default plan if none is provided.  Accept via query string.
+        $plan_param = $this->input->get('plan', TRUE);
+        $plan = $plan_param ? strtolower($plan_param) : $this->config->item('stripe_default_plan');
+        // Map plan to price ID based on config
+        switch ($plan) {
+            case 'standard':
+                $price_id = $this->config->item('stripe_price_standard');
+                break;
+            case 'pro':
+                $price_id = $this->config->item('stripe_price_pro');
+                break;
+            case 'basic':
+            default:
+                $price_id = $this->config->item('stripe_price_basic');
+                $plan = 'basic';
+                break;
+        }
         $success_url = base_url($this->config->item('stripe_success_path'));
         $cancel_url  = base_url($this->config->item('stripe_cancel_path'));
 
@@ -125,10 +147,11 @@ class Subscription extends CI_Controller
             return;
         }
         $session_id = $resp['id'];
-        // record the pending subscription
+        // record the pending subscription along with the requested tier
         $this->db->insert('subscriptions', [
             'user_id'           => $user->id,
             'stripe_session_id' => $session_id,
+            'tier'              => $plan,
             'status'            => 'pending',
             'created_at'        => date('Y-m-d H:i:s'),
             'updated_at'        => date('Y-m-d H:i:s'),
