@@ -36,6 +36,10 @@
  * @filesource
  */
 
+if(file_exists(__DIR__ . '/environment/secrets.php')) {
+	require __DIR__ . '/environment/secrets.php';
+}
+
 /*
  *---------------------------------------------------------------
  * APPLICATION ENVIRONMENT
@@ -53,7 +57,7 @@
  *
  * NOTE: If you change these, also change the error_reporting() code below
  */
-	define('ENVIRONMENT', isset($_SERVER['CI_ENV']) ? $_SERVER['CI_ENV'] : 'development');
+	define('ENVIRONMENT', defined('AS_ENVIRONMENT') ? constant('AS_ENVIRONMENT') : 'docker');
 
 /*
  *---------------------------------------------------------------
@@ -69,6 +73,11 @@ switch (ENVIRONMENT)
 		error_reporting(-1);
 		ini_set('display_errors', 1);
 	break;
+
+	case 'docker':
+		error_reporting(E_ALL ^ E_DEPRECATED);
+		ini_set('display_errors', 1);
+		break;
 
 	case 'testing':
 	case 'production':

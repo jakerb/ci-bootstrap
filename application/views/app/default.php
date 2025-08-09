@@ -1,4 +1,4 @@
 <?php $this->load->view('partials/header'); ?>
-<h1>ci-bootstrap</h1>
-<p>I'm your homepage.</p>
+<h1 class="text-3xl font-bold mb-4">ci-bootstrap</h1>
+<p class="text-gray-700">I'm your homepage.</p>
 <?php $this->load->view('partials/footer'); ?>

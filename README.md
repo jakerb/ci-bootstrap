@@ -46,7 +46,7 @@ DROP TABLE IF EXISTS `groups`;
 # Table structure for table 'groups'
 #
 
-CREATE TABLE `groups` (
+CREATE TABLE IF NOT EXISTS `groups` (
   `id` mediumint(8) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(20) NOT NULL,
   `description` varchar(100) NOT NULL,
@@ -69,7 +69,7 @@ DROP TABLE IF EXISTS `users`;
 # Table structure for table 'users'
 #
 
-CREATE TABLE `users` (
+CREATE TABLE IF NOT EXISTS `users` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `ip_address` varchar(45) NOT NULL,
   `username` varchar(100) NULL,
@@ -111,7 +111,7 @@ DROP TABLE IF EXISTS `users_groups`;
 # Table structure for table 'users_groups'
 #
 
-CREATE TABLE `users_groups` (
+CREATE TABLE IF NOT EXISTS `users_groups` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `user_id` int(11) unsigned NOT NULL,
   `group_id` mediumint(8) unsigned NOT NULL,
@@ -134,7 +134,7 @@ DROP TABLE IF EXISTS `login_attempts`;
 # Table structure for table 'login_attempts'
 #
 
-CREATE TABLE `login_attempts` (
+CREATE TABLE IF NOT EXISTS `login_attempts` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `ip_address` varchar(45) NOT NULL,
   `login` varchar(100) NOT NULL,
@@ -146,11 +146,26 @@ CREATE TABLE `login_attempts` (
 # Table structure for table 'ci_sessions'
 #
 
-CREATE TABLE `ci_sessions` (
+CREATE TABLE IF NOT EXISTS `ci_sessions` (
   `id` varchar(128) NOT NULL,
   `ip_address` varchar(45) NOT NULL,
   `timestamp` int(10) unsigned NOT NULL DEFAULT 0,
   `data` blob NOT NULL,
   KEY `ci_sessions_timestamp` (`timestamp`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+#
+# Table structure for table 'subscriptions'
+#
+
+CREATE TABLE IF NOT EXISTS `subscriptions` (
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
+  `user_id` INT(11) NOT NULL,
+  `stripe_session_id` VARCHAR(255) NOT NULL,
+  `status` VARCHAR(50) NOT NULL DEFAULT 'pending',
+  `created_at` DATETIME DEFAULT NULL,
+  `updated_at` DATETIME DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `user_id` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 ```

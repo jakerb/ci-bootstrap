@@ -53,3 +53,25 @@ $route['default_controller'] = 'app';
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
 
+/*
+| -------------------------------------------------------------------------
+| Custom Routes
+| -------------------------------------------------------------------------
+| Add new routes for social authentication, user profiles and
+| subscription management.  These routes map user friendly URLs to
+| their corresponding controller methods.
+*/
+
+// Social login (Google OAuth2)
+$route['login/google']          = 'social_login/google_login';
+$route['login/google/callback'] = 'social_login/google_callback';
+
+// User profile routes
+$route['profile']        = 'profile/index';
+$route['profile/update'] = 'profile/update';
+
+// Subscription routes
+$route['subscription/create'] = 'subscription/create';
+$route['subscription/success'] = 'subscription/success';
+$route['subscription/cancel']  = 'subscription/cancel';
+
